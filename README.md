@@ -4,18 +4,6 @@
 
 **서비스를 생성하고 작업하기**
 
-1. 아래의 명령어로 서비스를 생성합니다.
-
-    ```bash
-    python3 deploy.py 800 test-jobber --base-dir practice
-    ```
-
-1. services/jobber_service/practice/test-jobber 에서 제대로 생성이 되었는지 확인합니다.
-
-1. services/jobber_service/practice/test-jobber/src/app.py 파일을 편집기로 엽니다.
-
-1. 아래의 주석을 보면 Jobber 를 어떤식으로 사용해야 할 지 알 수 있습니다.
-
     ```python
     from pprint import pprint
     import layers.helper

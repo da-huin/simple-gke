@@ -28,4 +28,4 @@ RUN apt-get install vim -y
 COPY ./src /app
 WORKDIR /app
 
-CMD gcloud auth activate-service-account ${GCLOUD_SERVICE_ACCOUNT} --key-file=${GCLOUD_AUTH_PATH} --project=${GCLOUD_PROJECT_NAME}; if [ "$TEST" = "true" ]; then python3 app.py & pytest -s test.py; else python3 app.py; fi
+CMD gcloud auth activate-service-account ${GCLOUD_SERVICE_ACCOUNT} --key-file=${GCLOUD_AUTH_PATH} --project=${GCLOUD_PROJECT_NAME}; python3 app.py

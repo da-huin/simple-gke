@@ -211,7 +211,7 @@ class SimpleGKE:
                 raise ValueError(
                     f"name regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?'), but {action_name} received.")
 
-            environ["MASTER_TABLE_NAME"] = table_name
+            environ["TABLE_NAME"] = table_name
 
             self.create_table(table_name)
             str_values = ", ".join(values)
