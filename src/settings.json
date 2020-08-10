@@ -1,0 +1,177 @@
+{
+    "name": "jobber",
+    "api_schemas": {
+        "/": {
+            "schema": {
+                "properties": {},
+                "required": []
+            },
+            "properties": {}
+        },
+        "/status": {
+            "schema": {
+                "properties": {
+                    "table_name": {}
+                },
+                "required": ["table_name"]
+            },
+            "properties": {}
+        },
+        "/get_log": {
+            "schema": {
+                "properties": {
+                    "table_name": {}
+                },
+                "required": ["table_name"]
+            },
+            "properties": {}
+        },
+        "/kill": {
+            "schema": {
+                "properties": {
+                    "table_name": {}
+                },
+                "required": ["table_name"]
+            },
+            "properties": {}
+        },        
+        "/clear_log": {
+            "schema": {
+                "properties": {},
+                "required": []
+            },
+            "properties": {}
+        },           
+        "/create_cluster": {
+            "schema": {
+                "properties": {
+                    "machine_type": {},
+                    "disk_size": {},
+                    "num_nodes": {}
+                },
+                "required": []
+            },
+            "properties": {
+                "machine_type": {
+                    "default": "n1-standard-1"
+                },
+                "disk_size": {
+                    "default": "100"
+                },
+                "num_nodes": {
+                    "default": "5"
+                }
+            }
+        },
+        "/delete_cluster": {
+            "schema": {
+                "properties": {},
+                "required": []
+            },
+            "properties": {}
+        },
+        "/action": {
+            "schema": {
+                "properties": {
+                    "action_name": {},
+                    "each_args": {},
+                    "parallel_per_count": {
+                        "type": "integer"
+                    },
+                    "active_dead_line_seconds": {
+                        "type": "integer"
+                    },
+                    "container_image": {},
+                    "public_command": {
+                        "type": "array"
+                    },
+                    "public_args": {
+                        "type": "array"
+                    },
+                    "environ": {
+                        "type": "object"
+                    },
+                    "back_off_limit": {
+                        "type": "integer"
+                    },
+                    "cpu_limit": {},
+                    "memory_limit": {},
+                    "cpu_request": {},
+                    "memory_request": {}
+                },
+                "required": [
+                    "container_image",
+                    "each_args"
+                ]
+            },
+            "properties": {
+                "action_name": {
+                    "default": ""
+                },
+                "parallel_per_count": {
+                    "default": 10
+                },
+                "active_dead_line_seconds": {
+                    "default": 7200
+                },
+                "public_command": {
+                    "default": []
+                },
+                "public_args": {
+                    "default": []
+                },
+                "environ": {
+                    "default": {}
+                },
+                "back_off_limit": {
+                    "default": 100000
+                },
+                "cpu_limit": {
+                    "default": "32"
+                },
+                "memory_limit": {
+                    "default": "64Gi"
+                },
+                "cpu_request": {
+                    "default": "0.5"
+                },
+                "memory_request": {
+                    "default": "128Mi"
+                }
+            }
+        },
+        "/fetch": {
+            "schema": {
+                "properties": {
+                    "table_name": {}
+                },
+                "required": [
+                    "table_name"
+                ]
+            },
+            "properties": {}
+        },
+        "/report": {
+            "schema": {
+                "properties": {
+                    "table_name": {},
+                    "idx": {
+                        "type": "integer"
+                    },
+                    "note": {},
+                    "success": {}
+                },
+                "required": [
+                    "table_name",
+                    "idx",
+                    "success"
+                ]
+            },
+            "properties": {
+                "note": {
+                    "default": ""
+                }
+            }
+        }
+    }
+}
