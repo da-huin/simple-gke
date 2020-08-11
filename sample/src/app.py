@@ -7,9 +7,15 @@ master_uri = os.environ["MASTER_URI"]
 table_name = os.environ["TABLE_NAME"]
 
 def work(args):
-    pass
+    number_a = args["number_a"]
+    number_b_list = args["number_b_list"]
+    
+    note = [number_a * number_b for number_b in number_b_list]
+    return note    
 
 class Worker():
+
+
     def __init__(self):
         fetched_data = self.fetch()
         self.worker_index = fetched_data["idx"]
@@ -37,7 +43,7 @@ class Worker():
     def start(self):
         note = ""
         try:
-            work(self.args)
+            note = work(self.args)
         except Exception as e:
             self.report(False, str(e))
             raise Exception(e)

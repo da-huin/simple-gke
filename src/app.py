@@ -31,7 +31,6 @@ class SimpleGKE:
         self.flask_handler = flask_helper.FlaskHelper()
         self.register()
 
-
     def query(self, sqls: list, use_db=True):
         if not isinstance(sqls, list):
             raise ValueError("sqls type msut be list")
@@ -296,8 +295,8 @@ class SimpleGKE:
         return result
 
 if __name__ == "__main__":
-    SimpleGKE(os.environ["SELF_URI"], os.environ["DB_NAME"], 
-    os.environ["DB_HOSTNAME"], os.environ["DB_PORT"],
+    SimpleGKE(os.environ["SELF_URI"], os.environ.get("DB_NAME", "simple_gke"), 
+    os.environ["DB_HOSTNAME"], os.environ.get("DB_PORT", 3306),
     os.environ["DB_USER"], os.environ["DB_PASSWORD"],
     os.environ["GCLOUD_SERVICE_ACCOUNT"], os.environ["GCLOUD_PROJECT_NAME"], 
     os.environ.get("CLUSTER_NAME", "simple_gke")

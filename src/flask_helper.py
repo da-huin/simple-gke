@@ -111,7 +111,6 @@ class FlaskHelper():
         else:
             raise ValueError("invalid set type name %s" % (type_name))
 
-
     def listen(self):
 
         self.server.run("0.0.0.0", self.port)
