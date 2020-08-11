@@ -15,7 +15,7 @@ class NoMoreArgsError(Exception):
     pass
 
 class SimpleGKE:
-    def __init__(self, self_uri, db_name, db_hostname, db_port, db_user, db_password, gcloud_service_account, gcloud_project_name="", cluster_name="simple_gke"):
+    def __init__(self, self_uri, db_name, db_hostname, db_port, db_user, db_password, gcloud_service_account, gcloud_project_name="", cluster_name="simple-gke"):
         os.makedirs("/tmp/jobs", exist_ok=True)
         self._gcloud_service_account = gcloud_service_account
         self._gcloud_project_name = gcloud_project_name
@@ -46,8 +46,7 @@ class SimpleGKE:
         cursor = connection.cursor(pymysql.cursors.DictCursor)
 
         for sql in sqls:
-            print(sql)
-            print(cursor.execute(sql))
+            cursor.execute(sql)
         cursor.close()
 
         connection.commit()
@@ -135,13 +134,13 @@ class SimpleGKE:
             disk_size = args["disk_size"]
             num_nodes = args["num_nodes"]
 
-            command = f"""gcloud beta container --project "{self._gcloud_project_name}" clusters create "{self._cluster_name}" --zone "asia-northeast1-a" --no-enable-basic-auth --cluster-version "1.14.10-gke.36" --machine-type "{machine_type}" --image-type "COS" --disk-type "pd-standard" --disk-size "{disk_size}" --metadata disable-legacy-endpoints=true --preemptible --num-nodes "{num_nodes}" --enable-stackdriver-kubernetes --enable-ip-alias --network "projects/{self._gcloud_project_name}/global/networks/default" --subnetwork "projects/{self._gcloud_project_name}/regions/asia-northeast1/subnetworks/default" --default-max-pods-per-node "110" --enable-autoscaling --min-nodes "0" --max-nodes "1000" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --enable-autoprovisioning --min-cpu 1 --max-cpu 100 --min-memory 1 --max-memory 100 --autoprovisioning-service-account={self._gcloud_service_account} --autoscaling-profile optimize-utilization --enable-vertical-pod-autoscaling --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" --autoprovisioning-scopes="https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" --quiet --async  """
+            command = f"""gcloud beta container --project "{self._gcloud_project_name}" clusters create "{self._cluster_name}" --zone "asia-northeast1-a" --no-enable-basic-auth --machine-type "{machine_type}" --image-type "COS" --disk-type "pd-standard" --disk-size "{disk_size}" --metadata disable-legacy-endpoints=true --preemptible --num-nodes "{num_nodes}" --enable-stackdriver-kubernetes --enable-ip-alias --network "projects/{self._gcloud_project_name}/global/networks/default" --subnetwork "projects/{self._gcloud_project_name}/regions/asia-northeast1/subnetworks/default" --default-max-pods-per-node "110" --enable-autoscaling --min-nodes "0" --max-nodes "1000" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --enable-autoprovisioning --min-cpu 1 --max-cpu 100 --min-memory 1 --max-memory 100 --autoprovisioning-service-account={self._gcloud_service_account} --autoscaling-profile optimize-utilization --enable-vertical-pod-autoscaling --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" --autoprovisioning-scopes="https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" --quiet --async  """
             # self.hp.slack(command)
             print(command)
             result = self.check_output(command)
             print(result)
 
-            return "your request has been completed. please check the log"
+            return "your request has been completed. please check the cloud run log"
 
         @self.flask_handler.route("/delete_cluster")
         def delete_cluster(args):
@@ -149,7 +148,7 @@ class SimpleGKE:
             print(command)
             result = self.check_output(command)
             print(result)
-            return "your request has been completed. please check the log"
+            return "your request has been completed. please check the cloud run log"
 
         @self.flask_handler.route("/status")
         def status(args):
@@ -183,14 +182,14 @@ class SimpleGKE:
             container_image = args["container_image"]
             public_command = args["public_command"]
             public_args = args["public_args"]
-            environ = args["environ"]
             back_off_limit = args["back_off_limit"]
-            environ["MATSER_URI"] = self._self_uri
             cpu_limit = args["cpu_limit"]
             memory_limit = args["memory_limit"]
             cpu_request = args["cpu_request"]
             memory_request = args["memory_request"]
 
+            environ = args["environ"]
+            environ["MASTER_URI"] = self._self_uri
             if parallel_per_count < 1:
                 raise ValueError("parallel action count must be more then 0")
 
@@ -234,7 +233,6 @@ class SimpleGKE:
 
         @self.flask_handler.route("/fetch")
         def fetch(args):
-            result = ""
             table_name = args["table_name"]
 
             # 만약 status 중 ready 또는 running 이 없는데 가져오려고 한다면 모든 작업을 삭제한다.
@@ -245,11 +243,13 @@ class SimpleGKE:
             else:
                 idx = self.query([f"SET @result = (SELECT `idx` From `{table_name}` WHERE `status`='ready' LIMIT 1);",
                                   f"UPDATE `{table_name}` SET `status` = 'running' where idx = @result;", "SELECT @result;"])[0]["@result"]
-
-                result = self.query(
+                result = {}
+                query_result = self.query(
                     [f"SELECT idx, container_image, args, status, note FROM `{table_name}` WHERE idx='{idx}'"])[0]
                 result["args"] = json.loads(
-                    base64.b64decode(result["args"].encode()))
+                    base64.b64decode(query_result["args"].encode()))
+
+                result["idx"] = idx
 
             return result
 
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     os.environ["DB_HOSTNAME"], os.environ.get("DB_PORT", 3306),
     os.environ["DB_USER"], os.environ["DB_PASSWORD"],
     os.environ["GCLOUD_SERVICE_ACCOUNT"], os.environ["GCLOUD_PROJECT_NAME"], 
-    os.environ.get("CLUSTER_NAME", "simple_gke")
+    os.environ.get("CLUSTER_NAME", "simple-gke")
     ).flask_handler.listen()
 
 # GCLOUD_AUTH_PATH required.
