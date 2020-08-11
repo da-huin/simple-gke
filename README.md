@@ -373,7 +373,7 @@ handler.build_push("sample", dockerfile_dir)
 
 * `요청이 전송되었다는 메시지`: str
 
-### 🌱 action <a name="action"></a>
+### 🌱 /action <a name="action"></a>
 
 **Parameters**
 
